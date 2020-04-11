@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2019 Nathan Rajlich
+ * Copyright (c) 2010-2020 Nathan Rajlich
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -70,10 +70,10 @@ public class SSLSocketChannel implements WrappedByteChannel, ByteChannel, ISSLCh
 	 *
 	 * @since 1.4.0
 	 */
-	private static final Logger log = LoggerFactory.getLogger(SSLSocketChannel.class);
+	private final Logger log = LoggerFactory.getLogger(SSLSocketChannel.class);
 
 	/**
-	 * The underlaying socket channel
+	 * The underlying socket channel
 	 */
 	private final SocketChannel socketChannel;
 

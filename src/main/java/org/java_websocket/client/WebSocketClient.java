@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2019 Nathan Rajlich
+ * Copyright (c) 2010-2020 Nathan Rajlich
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -457,7 +457,7 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
 			socket.setTcpNoDelay( isTcpNoDelay() );
 			socket.setReuseAddress( isReuseAddr() );
 
-			if (!socket.isBound()) {
+			if (!socket.isConnected()) {
 				InetSocketAddress addr = new InetSocketAddress(dnsResolver.resolve(uri), this.getPort());
 				socket.connect(addr, connectTimeout);
 			}

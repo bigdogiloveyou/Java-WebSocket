@@ -29,7 +29,7 @@ To use maven add this dependency to your pom.xml:
 <dependency>
   <groupId>org.java-websocket</groupId>
   <artifactId>Java-WebSocket</artifactId>
-  <version>1.4.0</version>
+  <version>1.4.1</version>
 </dependency>
 ```
 
@@ -40,7 +40,7 @@ mavenCentral()
 ```
 Then you can just add the latest version to your build.
 ```xml
-compile "org.java-websocket:Java-WebSocket:1.4.0"
+compile "org.java-websocket:Java-WebSocket:1.4.1"
 ```
 
 #### Logging
@@ -100,8 +100,7 @@ It is currently not possible to accept ws and wss connections at the same time v
 
 For some reason Firefox does not allow multiple connections to the same wss server if the server uses a different port than the default port (443).
 
-
-If you want to use `wss` on the android platfrom you should take a look at [this](http://blog.antoine.li/2010/10/22/android-trusting-ssl-certificates/).
+If you want to use `wss` on the android platfrom you should take a look at [this](https://github.com/TooTallNate/Java-WebSocket/wiki/FAQ:-Secure-WebSockets#wss-on-android).
 
 I ( @Davidiusdadi ) would be glad if you would give some feedback whether wss is working fine for you or not.
 
@@ -110,8 +109,7 @@ Minimum Required JDK
 
 `Java-WebSocket` is known to work with:
 
- * Java 1.6 and higher
- * Android 4.0 and higher
+ * Java 1.7 and higher
 
 Other JRE implementations may work as well, but haven't been tested.
 

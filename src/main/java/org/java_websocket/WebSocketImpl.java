@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2019 Nathan Rajlich
+ * Copyright (c) 2010-2020 Nathan Rajlich
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -85,7 +85,7 @@ public class WebSocketImpl implements WebSocket {
 	 *
 	 * @since 1.4.0
 	 */
-	private static final Logger log = LoggerFactory.getLogger(WebSocketImpl.class);
+	private final Logger log = LoggerFactory.getLogger(WebSocketImpl.class);
 
 	/**
 	 * Queue of buffers that need to be sent to the client.
@@ -160,11 +160,6 @@ public class WebSocketImpl implements WebSocket {
 	 * Attribut to synchronize the write
 	 */
 	private final Object synchronizeWriteObject = new Object();
-
-	/**
-	 * Attribute to cache a ping frame
-	 */
-	private PingFrame pingFrame;
 
 	/**
 	 * Attribute to store connection attachment
@@ -524,7 +519,7 @@ public class WebSocketImpl implements WebSocket {
 			try {
 				channel.close();
 			} catch ( IOException e ) {
-				if( e.getMessage().equals( "Broken pipe" ) ) {
+				if( e.getMessage() != null && e.getMessage().equals( "Broken pipe" ) ) {
 					log.trace( "Caught IOException: Broken pipe during closeConnection()", e );
 				} else {
 					log.error("Exception during channel.close()", e);
@@ -667,11 +662,12 @@ public class WebSocketImpl implements WebSocket {
 		send( Collections.singletonList( framedata ) );
 	}
 
-	public void sendPing() {
-		if( pingFrame == null ) {
-			pingFrame = new PingFrame();
-		}
-		sendFrame( pingFrame );
+	public void sendPing() throws NullPointerException {
+		// Gets a PingFrame from WebSocketListener(wsl) and sends it.
+		PingFrame pingFrame = wsl.onPreparePing(this);
+		if(pingFrame == null)
+			throw new NullPointerException("onPreparePing(WebSocket) returned null. PingFrame to sent can't be null.");
+		sendFrame(pingFrame);
 	}
 
 	@Override

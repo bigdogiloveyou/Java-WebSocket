@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2019 Nathan Rajlich
+ * Copyright (c) 2010-2020 Nathan Rajlich
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -39,6 +39,8 @@ import org.java_websocket.handshake.ServerHandshakeBuilder;
  * This class default implements all methods of the WebSocketListener that can be overridden optionally when advances functionalities is needed.<br>
  **/
 public abstract class WebSocketAdapter implements WebSocketListener {
+
+	private PingFrame pingFrame;
 
 	/**
 	 * This default implementation does not do anything. Go ahead and overwrite it.
@@ -84,5 +86,19 @@ public abstract class WebSocketAdapter implements WebSocketListener {
 	@Override
 	public void onWebsocketPong( WebSocket conn, Framedata f ) {
 		//To overwrite
+	}
+
+	/**
+	 * Default implementation for onPreparePing, returns a (cached) PingFrame that has no application data.
+	 * @see org.java_websocket.WebSocketListener#onPreparePing(WebSocket)
+	 *
+	 * @param conn The <tt>WebSocket</tt> connection from which the ping frame will be sent.
+	 * @return PingFrame to be sent.
+	 */
+	@Override
+	public PingFrame onPreparePing(WebSocket conn) {
+		if(pingFrame == null)
+			pingFrame = new PingFrame();
+		return pingFrame;
 	}
 }
