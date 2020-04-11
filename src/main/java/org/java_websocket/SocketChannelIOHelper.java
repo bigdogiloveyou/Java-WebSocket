@@ -82,7 +82,7 @@ public class SocketChannelIOHelper {
 		ByteBuffer buffer = ws.outQueue.peek();
 		WrappedByteChannel c = null;
 
-		if( buffer == null ) {
+		if( buffer == null ) { // SSL
 			if( sockchannel instanceof WrappedByteChannel ) {
 				c = (WrappedByteChannel) sockchannel;
 				if( c.isNeedWrite() ) {
@@ -91,7 +91,9 @@ public class SocketChannelIOHelper {
 			}
 		} else {
 			do {// FIXME writing as much as possible is unfair!!
-				/*int written = */sockchannel.write( buffer );
+				/*int written = */
+				// 循环从 WebSocketImpl 的 outQueue 中取数据写出（发送）
+				sockchannel.write( buffer );
 				if( buffer.remaining() > 0 ) {
 					return false;
 				} else {

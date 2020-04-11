@@ -84,15 +84,15 @@ public class ChatServer extends WebSocketServer {
 		s.start();
 		System.out.println( "ChatServer started on port: " + s.getPort() );
 
-//		BufferedReader sysin = new BufferedReader( new InputStreamReader( System.in ) );
-//		while ( true ) {
-//			String in = sysin.readLine();
-//			s.broadcast( in );
-//			if( in.equals( "exit" ) ) {
-//				s.stop(1000);
-//				break;
-//			}
-//		}
+		BufferedReader sysin = new BufferedReader( new InputStreamReader( System.in ) );
+		while ( true ) {
+			String in = sysin.readLine();
+			s.broadcast( in );
+			if( in.equals( "exit" ) ) {
+				s.stop(1000);
+				break;
+			}
+		}
 	}
 	@Override
 	public void onError( WebSocket conn, Exception ex ) {

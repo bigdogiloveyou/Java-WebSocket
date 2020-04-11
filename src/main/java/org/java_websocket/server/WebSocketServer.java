@@ -102,8 +102,8 @@ public abstract class WebSocketServer extends AbstractWebSocket implements Runna
 
 	protected List<WebSocketWorker> decoders;
 
-	private List<WebSocketImpl> iqueue;
-	private BlockingQueue<ByteBuffer> buffers;
+	private List<WebSocketImpl> iqueue; // 这个主要是为了 SSL 的
+	private BlockingQueue<ByteBuffer> buffers;//这个 buffers 是为了协调服务器先 accept 后 read 的需求。
 	private int queueinvokes = 0;
 	private final AtomicInteger queuesize = new AtomicInteger( 0 );
 
@@ -335,6 +335,9 @@ public abstract class WebSocketServer extends AbstractWebSocket implements Runna
 					Set<SelectionKey> keys = selector.selectedKeys();
 					Iterator<SelectionKey> i = keys.iterator();
 
+					// 服务器的读写也已经分离了，读操作主要给 WebSocketWorker 线程，
+					// 而写操作主要是这个主线程。虽然这个循环读写都有，但是到了读操作这边，是将数据放入
+					// WebSocketImpl 的 inqueue 里，让 WebSocketWorker 取 WebSocketImpl 的 inqueue
 					while ( i.hasNext() ) {
 						key = i.next();
 						conn = null;
@@ -356,6 +359,7 @@ public abstract class WebSocketServer extends AbstractWebSocket implements Runna
 							doWrite(key);
 						}
 					}
+					// 主要为了 SSL 的
 					doAdditionalRead();
 				} catch ( CancelledKeyException e ) {
 					// an other thread may cancel the key
@@ -427,6 +431,7 @@ public abstract class WebSocketServer extends AbstractWebSocket implements Runna
 		socket.setTcpNoDelay( isTcpNoDelay() );
 		socket.setKeepAlive( true );
 		WebSocketImpl w = wsf.createWebSocket( this, drafts );
+		// 这边直接把 WebSocketImpl 注册到 SelectionKey，当读取的时候，就会从 SelectionKey 获取 WebSocketImpl
 		w.setSelectionKey(channel.register( selector, SelectionKey.OP_READ, w ));
 		try {
 			w.setChannel( wsf.wrapChannel( channel, w.getSelectionKey() ));
@@ -458,10 +463,10 @@ public abstract class WebSocketServer extends AbstractWebSocket implements Runna
 			return false;
 		}
 		try {
-			if( SocketChannelIOHelper.read( buf, conn, conn.getChannel() ) ) {
-				if( buf.hasRemaining() ) {
-					conn.inQueue.put( buf );
-					queue( conn );
+			if( SocketChannelIOHelper.read( buf, conn, conn.getChannel() ) ) {//将数据从 channel 读取到 buffer 中
+				if( buf.hasRemaining() ) {//buffer 有数据
+					conn.inQueue.put( buf );//将 buffer 数据放入到 WebSocketImpl 的 inQueue 中
+					queue( conn );//将连接 WebSocketImpl 放入到 WebSocketWorker 的 iqueue 中，以便与它的线程从 WebSocketImpl 的 inQueue 中获取数据
 					i.remove();
 					if( conn.getChannel() instanceof WrappedByteChannel && ( (WrappedByteChannel) conn.getChannel() ).isNeedRead() ) {
 						iqueue.add( conn );
