@@ -216,11 +216,12 @@ public class WebSocketImpl implements WebSocket {
 		assert ( socketBuffer.hasRemaining() );
 		log.trace( "process({}): ({})", socketBuffer.remaining(),  ( socketBuffer.remaining() > 1000 ? "too big to display" : new String( socketBuffer.array(), socketBuffer.position(), socketBuffer.remaining() ) ));
 
-		if( readyState != ReadyState.NOT_YET_CONNECTED ) {
+		if( readyState != ReadyState.NOT_YET_CONNECTED ) { // 这个状态是非"无连接"，即刚开始握手还没完成阶段
 			if( readyState == ReadyState.OPEN ) {
 				decodeFrames( socketBuffer );
 			}
 		} else {
+		    // 解码 handshake
 			if( decodeHandshake( socketBuffer ) && (!isClosing() && !isClosed())) {
 				assert ( tmpHandshakeBytes.hasRemaining() != socketBuffer.hasRemaining() || !socketBuffer.hasRemaining() ); // the buffers will never have remaining bytes at the same time
 				if( socketBuffer.hasRemaining() ) {
@@ -323,12 +324,15 @@ public class WebSocketImpl implements WebSocket {
 				} else if( role == Role.CLIENT ) {
 					draft.setParseMode( role );
 					Handshakedata tmphandshake = draft.translateHandshake( socketBuffer );
+					// 如果 role 为 client，那么生成的 handsshake 为 serverhandshake
 					if( !( tmphandshake instanceof ServerHandshake ) ) {
 						log.trace("Closing due to protocol error: wrong http function");
 						flushAndClose( CloseFrame.PROTOCOL_ERROR, "wrong http function", false );
 						return false;
 					}
 					ServerHandshake handshake = ( ServerHandshake ) tmphandshake;
+
+					// 检查 server 回应的 handshake 是否合法
 					handshakestate = draft.acceptHandshakeAsClient( handshakerequest, handshake );
 					if( handshakestate == HandshakeState.MATCHED ) {
 						try {
@@ -343,6 +347,7 @@ public class WebSocketImpl implements WebSocket {
 							flushAndClose( CloseFrame.NEVER_CONNECTED, e.getMessage(), false );
 							return false;
 						}
+						// handshake 结束后，开始打开连接
 						open( handshake );
 						return true;
 					} else {
@@ -375,6 +380,10 @@ public class WebSocketImpl implements WebSocket {
 		return false;
 	}
 
+    /**
+     * 解码收到的数据帧
+     * @param socketBuffer
+     */
 	private void decodeFrames( ByteBuffer socketBuffer ) {
 		List<Framedata> frames;
 		try {
@@ -702,6 +711,7 @@ public class WebSocketImpl implements WebSocket {
 
 	/**
 	 * Write a list of bytebuffer (frames in binary form) into the outgoing queue
+     * 只是将数据放入 queue 中，然后让另一个发送线程获取数据发送，本身这个 write 函数并没做任何操作
 	 *
 	 * @param bufs the list of bytebuffer
 	 */

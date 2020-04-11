@@ -102,6 +102,7 @@ public abstract class Draft {
 			handshake = translateHandshakeHttpServer(firstLineTokens, line);
 		}
 		line = readStringLine( buf );
+		// 除第一行外剩下行的解析
 		while ( line != null && line.length() > 0 ) {
 			String[] pair = line.split( ":", 2 );
 			if( pair.length != 2 )

@@ -259,6 +259,13 @@ public class Draft_6455 extends Draft {
 		return HandshakeState.NOT_MATCHED;
 	}
 
+	/**
+	 * 作为 client，接收到 server 的 handshake
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws InvalidHandshakeException
+	 */
 	@Override
 	public HandshakeState acceptHandshakeAsClient( ClientHandshake request, ServerHandshake response ) throws InvalidHandshakeException {
 		if (! basicAccept( response )) {

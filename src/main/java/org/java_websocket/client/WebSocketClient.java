@@ -474,6 +474,7 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
 			istream = socket.getInputStream();
 			ostream = socket.getOutputStream();
 
+			// 啥都没做
 			sendHandshake();
 		} catch ( /*IOException | SecurityException | UnresolvedAddressException | InvalidHandshakeException | ClosedByInterruptException | SocketTimeoutException */Exception e ) {
 			onWebsocketError( engine, e );
@@ -490,6 +491,7 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
 			throw e;
 		}
 
+		// 真正发送数据是在这个写工作线程里
 		writeThread = new Thread( new WebsocketWriteThread(this) );
 		writeThread.start();
 
@@ -497,6 +499,7 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
 		int readBytes;
 
 		try {
+			// istream 是 socket 收到的数据
 			while ( !isClosing() && !isClosed() && ( readBytes = istream.read( rawbuffer ) ) != -1 ) {
 				engine.decode( ByteBuffer.wrap( rawbuffer, 0, readBytes ) );
 			}

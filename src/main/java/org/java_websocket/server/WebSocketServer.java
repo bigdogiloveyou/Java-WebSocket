@@ -310,6 +310,7 @@ public abstract class WebSocketServer extends AbstractWebSocket implements Runna
 	}
 
 	// Runnable IMPLEMENTATION /////////////////////////////////////////////////
+    // 这是 server 运行的主方法
 	public void run() {
 		if (!doEnsureSingleThread()) {
 			return;
